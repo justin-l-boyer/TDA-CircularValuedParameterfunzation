@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+
+# load typical modules
+import numpy as np
+import pandas as pd
+#from dionysus import *
+#from dionysus import *
+#from dionysus.viewer import *
+import matplotlib.pyplot as plt
+#%matplotlib inline
+# load created modules
+from generateData import sineData
+from timeDelayEmbedding import embed
+from generateHomology import *
+# generate some data
+V = sineData(0,3,0.1)
+
+# try an embedding
+embeding_length = 3
+number_of_embeddings = 9
+em = embed(V[:,1], number_of_embeddings+1, embeding_length)
+
+# flatten the embedding
+em = em.flatten()
+
+# generate t
+T = V[0:embeding_length,0]
+t = np.empty([embeding_length*number_of_embeddings,])
+for i in range(embeding_length*number_of_embeddings):
+    t[i] = T[i%embeding_length]
+    
+# create list
+data = np.empty([embeding_length*number_of_embeddings,2])
+data[:,0] = t
+data[:,1] = em
+data = data.tolist()
+
+# try calc homology
+[rips, simplices] = genRips(data, 2, 0.5)
+genPersistenceDiagram(simplices, rips)
