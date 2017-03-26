@@ -1,1 +1,0 @@
-../Dionysus/examples/cohomology/cocycle.py
