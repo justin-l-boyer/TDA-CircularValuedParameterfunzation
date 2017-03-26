@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from subprocess import call
 import webbrowser
 import os
+<<<<<<< HEAD
 import heapq
 #%matplotlib inline
 
@@ -52,6 +53,30 @@ X = embed(V[:,1], taumax, elen, dt)
 #X = float_formatter(X)
 #X.astype('float64', order='C')
 np.savetxt('data.txt', X, fmt='%0.19f')
+=======
+#%matplotlib inline
+
+# load created modules
+from generateData import cosineData
+from slideWindows import getSlidingWindow
+from plottingPersistence import plotPersistence
+#from generateHomology import *
+
+# generate some data
+V = cosineData(0, 10, 100, std_dev=0.001)
+
+# slide ya window 1 0.1713 inf -- 1 0.169524 inf
+dim = 8
+Tau = 1
+dT = 1
+X = getSlidingWindow(V[:,1], dim, Tau, dT)
+#extent = Tau*dim
+
+
+# write the data to a txt
+X.astype('float64', order='C')
+np.savetxt('data.txt', X)
+>>>>>>> fed1a1fde26c5cce57ebc7e20921986502c5eddb
 
 # remove old files
 try:
@@ -90,7 +115,11 @@ except OSError:
 print("Removed files")
 
 # run cohomolgy on data
+<<<<<<< HEAD
 max_distance = 2
+=======
+max_distance = 1.5
+>>>>>>> fed1a1fde26c5cce57ebc7e20921986502c5eddb
 skeleton = 2
 data_file = 'data.txt' #'sample2noComma.txt'
 max_distance = str(max_distance)
@@ -105,16 +134,24 @@ dgm = pd.read_table('points.dgm', delim_whitespace=True)
 dgmMax = np.ceil(float(max(dgm.iloc[:,[2]])))
 dgm = dgm.replace('inf', dgmMax*10)
 dgm = dgm.as_matrix()
+<<<<<<< HEAD
 #plotPersistence(dgm)
 print("Top 10 max lifetimes: \n{0}".format("\n".join(str(x) for x in heapq.nlargest(10,dgm[:,2]-dgm[:,1]))))
+=======
+plotPersistence(dgm)
+
+>>>>>>> fed1a1fde26c5cce57ebc7e20921986502c5eddb
 
 # assign each vertex of input to a circle valued function
 a = call(['python2.7 cocycle.py points.bdry points-0.ccl points.vrt'], shell=True)
 call(['python2.7 cocycle.py points.bdry points-1.ccl points.vrt'], shell=True)
 if a==0:
     print("Assigned vertex")
+<<<<<<< HEAD
 else:
     print("Vertices not assigned to circle valued function.  Exit")
+=======
+>>>>>>> fed1a1fde26c5cce57ebc7e20921986502c5eddb
 
 # generate pdf to visulaize values assigned to points
 vis_path = 'python2.7 plot.py points-0.val ' + data_file + ' scatter.py points-0.val points-1.val'
