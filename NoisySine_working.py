@@ -38,7 +38,7 @@ plt.plot(V[:,0],V[:,1])
 #X = getSlidingWindow(V[:,1], dim, Tau, dT)
 #resolution = V.shape[0]
 #tauWidth = int(resolution*0.5)
-taumax = 55#np.argmin(V[:,1])+ tauWidth
+taumax = 60#np.argmin(V[:,1])+ tauWidth
 elen = 110
 dt = 40 #np.argmin(V[:wavelength*resolution/10,1])
 X = embed(V[:,1], taumax, elen, dt) 
