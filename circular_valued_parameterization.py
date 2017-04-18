@@ -21,6 +21,7 @@ Created on Sun Apr  2 10:21:04 2017
 from subprocess import call
 import webbrowser
 import os
+import glob
 import heapq
 
 def circleValuedParametrization(data, max_distance, skeleton=2, display=True):
@@ -30,7 +31,9 @@ def circleValuedParametrization(data, max_distance, skeleton=2, display=True):
     except OSError:
         pass
     try:
-        os.remove('points-1.ccl')
+        filelist=glob.glob('*.ccl')
+        for file in filelist:
+            os.remove(file)
     except OSError:
         pass
     try:
@@ -75,7 +78,7 @@ def circleValuedParametrization(data, max_distance, skeleton=2, display=True):
         print("Assigned vertex")
     else:
         print("Vertices not assigned to circle valued function.  Exit")
-        
+        return
     
     # generate pdf to visulaize values assigned to points
     vis_path = 'python2.7 plot.py points-0.val ' + data_file + ' scatter.py points-0.val points-1.val'
@@ -92,3 +95,62 @@ def circleValuedParametrization(data, max_distance, skeleton=2, display=True):
     elif a!=0:
         print("Unable to construct circle valued parameterization")
     return
+
+
+
+def circValAssign(data, max_distance, skeleton=2):
+    # remove old files
+    try:
+        os.remove('points-1.val')
+    except OSError:
+        pass
+    try:
+        filelist=glob.glob('*.ccl')
+        for file in filelist:
+            os.remove(file)
+    except OSError:
+        pass
+    try:
+        os.remove('points-0.val')
+    except OSError:
+        pass
+    try:
+        os.remove('points-0.pdf')
+    except OSError:
+        pass
+    try:
+        os.remove('points-0.ccl')
+    except OSError:
+        pass
+    try:
+        os.remove('points.vrt')
+    except OSError:
+        pass
+    try:
+        os.remove('points.dgm')
+    except OSError:
+        pass
+    try:
+        os.remove('points.bdry')
+    except OSError:
+        pass
+    
+    print("Removed files")
+    
+    # run cohomolgy on data
+    data_file = str(data) #'sample2noComma.txt'
+    max_distance = str(max_distance)
+    skeleton = str(skeleton)
+    path = './rips-pairwise-cohomology ' + data_file + ' -m '+ max_distance +' -s ' + skeleton + ' -b points.bdry -c points -v points.vrt -d points.dgm'
+    call([path], shell=True)
+    print("Built Rips")
+    
+#    # assign each vertex of input to a circle valued function
+#    a = call(['python2.7 cocycle.py points.bdry points-0.ccl points.vrt'], shell=True)
+#    call(['python2.7 cocycle.py points.bdry points-1.ccl points.vrt'], shell=True)
+#    if a==0:
+#        print("Assigned vertex")
+#    else:
+#        print("Vertices not assigned to circle valued function.  Exit")
+#        return
+    
