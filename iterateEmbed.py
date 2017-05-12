@@ -21,116 +21,61 @@ import heapq
 # load created modules
 #from generateData import sineData
 #from slideWindowsNoInterp import getSlidingWindow
-from plottingPersistence import plotPersistence
+#from plottingPersistence import plotPersistence
 from timeDelayEmbedding import embed
+from circular_valued_parameterization import circValAssign
 #from generateHomology import *
 
-# generate some data
 
-#V = sineData(0, 10, 200, wavelength, std_dev=0.5)
-#V=V.transpose().dropna()
-#V = V.as_matrix()
-plt.plot(V)
-dt = 25
-startTau=45
-stopTau = 55
-startWind = 50
-stopWind = 61
-i = startWind
-j = startTau
-a=1
-stop = 1
-while stop==1:
-    elen = i
-    print("")
-    print(i)
-    print("+++++++++++++++++++++++++++")
-    a=1
-    while a!=0:
-        taumax = j
-        print(j)
-        print("~~~~~~~~~~~~~~~~~~~~~~~")
-        X = embed(V[:,1], taumax, elen, dt) 
-        X.astype('float64', order='C')
-        np.savetxt('data.txt', X, fmt='%0.19f')
+def findCircParam(time_series, dt, maxRips, startWind, stopWind):
+    j = 1
+    i = startWind
+    a = 1
+    stop = 1
+    while stop==1:
+        elen = i
+        print("")
+        print(i)
+        print("+++++++++++++++++++++++++++")
+        a=1
+        while a!=0:
+            taumax = time_series.shape[0]-elen
+            print(j)
+            print("~~~~~~~~~~~~~~~~~~~~~~~")
+            X = embed(time_series, taumax, elen, dt) 
+            X.astype('float64', order='C')
+            np.savetxt('data.txt', X, fmt='%0.19f')
+            
+            circValAssign('./data.txt', j)
+            # assign each vertex of input to a circle valued function
+            a = call(['python2.7 cocycle.py points.bdry points-0.ccl points.vrt'], shell=True)
+            call(['python2.7 cocycle.py points.bdry points-1.ccl points.vrt'], shell=True)
+            if a==0:
+                print("Assigned vertex")
+            else:
+                print("Vertices not assigned to circle valued function.  Exit")
+                j = j + 1
+            
+            if a==0:
+                stop=0
+            elif j==maxRips:
+                a=0
+                j = 1
+        i = i+1
         
-        # remove old files
-        try:
-            os.remove('points-1.val')
-        except OSError:
-            pass
-        try:
-            os.remove('points-1.ccl')
-        except OSError:
-            pass
-        try:
-            os.remove('points-0.val')
-        except OSError:
-            pass
-        try:
-            os.remove('points-0.pdf')
-        except OSError:
-            pass
-        try:
-            os.remove('points-0.ccl')
-        except OSError:
-            pass
-        try:
-            os.remove('points.vrt')
-        except OSError:
-            pass
-        try:
-            os.remove('points.dgm')
-        except OSError:
-            pass
-        try:
-            os.remove('points.bdry')
-        except OSError:
-            pass
-        
-        print("Removed files")
-        
-        # run cohomolgy on data
-        max_distance = 2
-        skeleton = 2
-        data_file = 'data.txt' #'sample2noComma.txt'
-        max_distance = str(max_distance)
-        skeleton = str(skeleton)
-        path = './rips-pairwise-cohomology ' + data_file + ' -m '+ max_distance +' -s ' + skeleton + ' -b points.bdry -c points -v points.vrt -d points.dgm'
-        call([path], shell=True)
-        print("Built Rips")
-        
-        
-        # plot persistence
-        dgm = pd.read_table('points.dgm', delim_whitespace=True)
-        dgmMax = np.ceil(float(max(dgm.iloc[:,[2]])))
-        dgm = dgm.replace('inf', dgmMax*10)
-        dgm = dgm.as_matrix()
-        print("Top 10 max lifetimes: \n{0}".format("\n".join(str(x) for x in heapq.nlargest(10,dgm[:,2]-dgm[:,1]))))
-        #plotPersistence(dgm)
-        
-        
-        # assign each vertex of input to a circle valued function
-        a = call(['python2.7 cocycle.py points.bdry points-0.ccl points.vrt'], shell=True)
-        call(['python2.7 cocycle.py points.bdry points-1.ccl points.vrt'], shell=True)
-        if a==0:
-            print("Assigned vertex")
-        else:
-            print("Vertices not assigned to circle valued function.  Exit")
-        j = j +1
-        
-        if a==0:
-            stop=0
-        elif j==stopTau:
-            a=0
-            j = startTau
-    i = i+1
+    # generate pdf to visulaize values assigned to points
+    vis_path = 'python2.7 plot.py points-0.val ' + 'data.txt' + ' scatter.py points-0.val points-1.val'
+    a = call([vis_path], shell=True)
+    if a==0:
+        print("Generated graphic")
     
-# generate pdf to visulaize values assigned to points
-vis_path = 'python2.7 plot.py points-0.val ' + data_file + ' scatter.py points-0.val points-1.val'
-a = call([vis_path], shell=True)
-if a==0:
-    print("Generated graphic")
-
-# open pdf
-webbrowser.open_new(r'file:/home/wilson/Documents/17_Spring/TDA/DelayEmbedding/points-0.pdf')
+    # print working embedding length and cutoff parameter
+    print("")
+    print("The first usable embedding length is {0}".format(i-1))
+    print("")
+    print("With a maximum Tau of {0}".format(taumax))
+    print("")
+    print("With a corresponding complex cutoff parameter of {0}".format(j))
+    # open pdf
+    webbrowser.open_new(r'file:/home/wilson/Documents/17_Spring/TDA/DelayEmbedding/points-0.pdf')
+    return(i-1,taumax,j)
