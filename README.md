@@ -2,7 +2,7 @@
 Use persistent cohomology and time delay embedding to identify and visualize periods in time series
 
 ## Dependencies
- - Dionysus 
+ - Dionysus (version 1)
  - Python 2.7
 
 ## How to
